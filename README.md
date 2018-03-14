@@ -7,6 +7,6 @@
 * 微信二维码 ：  
  ![image](./doc/img/my_wechat.png)  
 ## 文章目录
-- [用GO语言实现比特币算法](/article/用GO语言实现比特币算法.md)
+- [用GO语言实现比特币算法](/doc/article/用GO语言实现比特币算法.md)
 
 

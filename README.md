@@ -5,7 +5,7 @@
 * go-ethereum version：**1.8.1**
 * **文章基本都是来自巴比特，非常感谢，每篇文章小编都会加入对应文章链接，若对作者造成影响，请联系下方微信，小编会及时删除**
 * 微信二维码 ：  
- ![image](./doc/img/my_wechat.png (600*800))  
+ ![image](./doc/img/my_wechat.png)  
 ## 文章目录
 
 

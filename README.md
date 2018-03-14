@@ -8,8 +8,8 @@
 * 源码解析参考了https://github.com/ZtesoftCS/go-ethereum-code-analysis，在此也感谢道友的无私分享。
 ## 联系方式
 * 小编微信二维码 ：  
- ![image](/doc/img/my_wechat.png) 
- **关注时，请添加备注：github区块链爱好者，谢谢^_^**     
+ ![image](/doc/img/my_wechat.png)  
+**关注时，请添加备注：github区块链爱好者，谢谢^_^**     
 ## 文章目录
 - 巴比特（技术分支）  
     - [用GO语言实现比特币算法](/doc/article/用GO语言实现比特币算法.md)  

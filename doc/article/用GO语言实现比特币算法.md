@@ -4,7 +4,7 @@
 本节的这个例子展示一点点高精度数学包一点点散列包hash一点点加密包还有一点点测试包的知识。这里不介绍协议和算法——尽管它们很有趣，而是试图指出，对多种操作系统的支持，是实现这种跨平台应用的理想语言。
 ## 位钱（bitcoin）  
 位钱（bitcoin）是一种使用加密手段制作的分布式电子货币。它最初于1998年由Wei Dai提出，并由中本聪（Satoshi Nakamoto）及其伙伴，于2009年在Windows、Linux和Mac OS X上实现。这些客户端软件帮助用户管理电子钱包，钱包里面包括一系列的公钥加密密钥对（public-key cryptographic keypair）。每个密钥对的公钥（public key）转化为一个位钱地址，作为交易的接收地址。这个地址是可以供人使用的，大约33个字符，使用的是Base58的编码方式。而每个私钥（private key）用来签发发自此钱包的交易。  
-![image](./doc/img/1-1.png)
+![image](/doc/img/1-1.png)
 ## 实现  
 * 我们看看如何使用Go来完成位钱地址所需的Base58编码
 ```go language

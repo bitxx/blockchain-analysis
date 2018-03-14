@@ -1,0 +1,1 @@
+geth attach --datadir "/Users/singularapple/Documents/sangular_project/go/blockchain-analysis/block_chain"

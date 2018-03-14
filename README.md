@@ -6,7 +6,7 @@
 * go-ethereum version：**1.8.1** 文中描述的源码解析，在源码中也有详细备注
 ## 感谢 
 * 文章基本都是来自[巴比特](http://www.8btc.com/)，非常感谢，每篇文章小编都会加入对应文章链接，若对作者造成影响，请联系下方微信，小编会及时删除
-* 源码解析参考了https://github.com/ZtesoftCS/go-ethereum-code-analysis，在此也感谢道友的无私分享。
+* 源码解析参考了[ZtesoftCS](https://github.com/ZtesoftCS/go-ethereum-code-analysis)，在此也感谢道友的无私分享。
 ## 联系方式
 * 小编微信二维码 ：  
  ![image](/doc/img/my_wechat.png)  

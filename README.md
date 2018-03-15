@@ -16,7 +16,7 @@
 - 技术文章（顺序不分先后） 
     - [用GO语言实现比特币算法-巴比特](/doc/article/用GO语言实现比特币算法.md) 
     - [以太坊ERC20 Token标准完整说明-CSDN](/doc/article/以太坊ERC20_Token标准完整说明.md)
-        - [Token源码实现](/block_chain/contact/Fan.sol)
+        - [Token源码实现-附详细中文注释](/block_chain/contact/Fan.sol)
 - go-ethereum源码解析  
     - [常用命令汇总](/doc/command)
     - [rlp源码解析](/doc/eth_src_analysis/rlp源码解析.md)

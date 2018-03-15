@@ -30,6 +30,7 @@ contract Token {
     /// @return 是否成功
     function approve(address _spender, uint256 _value) returns (bool success);
 
+    /// @notice _owner允许_spender最多交易多少token，保存映射：allowed[_owner][_spender];
     /// @param _owner 拥有token的账户
     /// @param _spender 被交易用户的账户
     /// @return 最多允许交易多少token
@@ -39,9 +40,9 @@ contract Token {
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 }
 
-//迁移，貌似是要将当前代币移到uip上
+//迁移，将当前代币移到eos平台上
 contract IMigrationContract {
-    function migrate(address addr, uint256 uip) returns (bool success);
+    function migrate(address addr, uint256 fb) returns (bool success);
 }
 
 contract SafeMath {
@@ -80,6 +81,7 @@ contract StandardToken is Token {
         }
     }
 
+    //allowed[_from][msg.sender]：其中_from允许_to最多交易_value个token
     function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
         if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
             balances[_to] += _value;
@@ -92,16 +94,19 @@ contract StandardToken is Token {
         }
     }
 
+    //查询余额
     function balanceOf(address _owner) constant returns (uint256 balance) {
         return balances[_owner];
     }
 
+    //设置msg.sender允许_spender转多少token
     function approve(address _spender, uint256 _value) returns (bool success) {
         allowed[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
         return true;
     }
 
+    //查询_owner最多允许spender转多少token
     function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
         return allowed[_owner][_spender];
     }
@@ -110,45 +115,45 @@ contract StandardToken is Token {
     mapping (address => mapping (address => uint256)) allowed; //发送账户允许转的上线，比如：allowed[_from][msg.sender] msg.sender账户最多允许从_from账户交易的token的数量
 }
 
-contract UnlimitedIPToken is StandardToken, SafeMath {
+contract FBToken is StandardToken, SafeMath {
 
-    // metadata
-    string  public constant name = "UnlimitedIP Token";
-    string  public constant symbol = "UIP";
+    // 元数据
+    string  public constant name = "FB Token";
+    string  public constant symbol = "FB";
     uint256 public constant decimals = 18;
     string  public version = "1.0";
 
-    // contracts
-    address public ethFundDeposit;          // deposit address for ETH for UnlimitedIP Team.
-    address public newContractAddr;         // the new contract for UnlimitedIP token updates;
+    // 合约
+    address public ethFundDeposit;          // FB存储ETH的地址
+    address public newContractAddr;         // FBtoken用于更新合约的地址
 
     // crowdsale parameters
-    bool    public isFunding;                // switched to true in operational state
-    uint256 public fundingStartBlock;
-    uint256 public fundingStopBlock;
+    bool    public isFunding;                // 在正式运转时候，设为true
+    uint256 public fundingStartBlock;        // 块资金开始
+    uint256 public fundingStopBlock;         // 块资金截止
 
-    uint256 public currentSupply;           // current supply tokens for sell
-    uint256 public tokenRaised = 0;         // the number of total sold token
-    uint256 public tokenMigrated = 0;     // the number of total transferted token
+    uint256 public currentSupply;           // 当前用于销售的token
+    uint256 public tokenRaised = 0;         // 所有要销售的token
+    uint256 public tokenMigrated = 0;     // 总的用于交易的token
     uint256 public tokenExchangeRate = 1000;             // 1000 UIP tokens per 1 ETH
 
     // events
     event IssueToken(address indexed _to, uint256 _value);      // issue token for public sale;
     event IncreaseSupply(uint256 _value);
     event DecreaseSupply(uint256 _value);
-    event Migrate(address indexed _to, uint256 _value);
-    event Burn(address indexed from, uint256 _value);
+    event Migrate(address indexed _to, uint256 _value);  //总的
+    event Burn(address indexed from, uint256 _value);  //销毁
     // format decimals.
     function formatDecimals(uint256 _value) internal returns (uint256 ) {
         return _value * 10 ** decimals;
     }
 
     // constructor
-    function UnlimitedIPToken()
+    function FBToken()
     {
-        ethFundDeposit = 0xBbf91Cf4cf582600BEcBb63d5BdB8D969F21779C;
+        ethFundDeposit = 0xBbf91Cf4cf582600BEcBb63d5BdB8D969F21779C; //eth众筹的资金存放地址
 
-        isFunding = false;                           //controls pre through crowdsale state
+        isFunding = false;                           //通过crowdsale状态来控制
         fundingStartBlock = 0;
         fundingStopBlock = 0;
 

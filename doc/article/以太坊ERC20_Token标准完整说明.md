@@ -1,10 +1,9 @@
 # 以太坊ERC20_Token标准完整说明  
-市面上出现了大量的用ETH做的代币，他们都遵守REC20协议，那么我们需要知道什么是REC20协议。   
 **idea_wj小编备注：**  
 * 本文参考了：http://blog.csdn.net/diandianxiyu_geek/article/details/78082551?utm_source=gold_browser_extension  
 * 原文中涉及到了以太坊官方的翻译，但部分翻译不太好理解，小编按自己理解改了一下。  
 * 以太坊Token涉及官方标准：https://ethereum.org/token#the-code
-* 基于此规范,小编实现了Token合约[MyToken](../../block_chain/contact/Fan.sol):
+* 基于此规范,小编实现了一个可以用于发布的合约：[MyToken](../../block_chain/contact/Fan.sol)
 ## 什么是ERC20 token  
 * token代表数字资产，具有价值，但是并不是都符合特定的规范。  
 * 基于ERC20的货币更容易互换，并且能够在Dapps上相同的工作。  

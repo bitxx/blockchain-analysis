@@ -3,41 +3,43 @@
 pragma solidity ^0.4.10;
 
 contract Token {
-    /// total amount of tokens
+    /// 所有的token种类
     uint256 public totalSupply;
 
-    /// @param _owner The address from which the balance will be retrieved
-    /// @return The balance	
+    /// @notice 查询余额
+    /// @param _owner 该地址对应的余额
+    /// @return 返回余额
     function balanceOf(address _owner) constant returns (uint256 balance);
 
-    /// @notice send `_value` token to `_to` from `msg.sender`
-    /// @param _to The address of the recipient
-    /// @param _value The amount of token to be transferred
-    /// @return Whether the transfer was successful or not	
+    /// @notice 从msg.sender发送token给_to
+    /// @param token接受人
+    /// @param _value 要转移的token数量
+    /// @return 返回交易成功或者失败
     function transfer(address _to, uint256 _value) returns (bool success);
 
-    /// @notice send `_value` token to `_to` from `_from` on the condition it is approved by `_from`
-    /// @param _from The address of the sender
-    /// @param _to The address of the recipient
-    /// @param _value The amount of token to be transferred
-    /// @return Whether the transfer was successful or not	
+    /// @notice 从_from发送token给_to
+    /// @param _from 发送者
+    /// @param _to 接收者
+    /// @param _value 发送的token数量
+    /// @return 是否成功
     function transferFrom(address _from, address _to, uint256 _value) returns (bool success);
 
-    /// @notice `msg.sender` approves `_spender` to spend `_value` tokens
-    /// @param _spender The address of the account able to transfer the tokens
-    /// @param _value The amount of tokens to be approved for transfer
-    /// @return Whether the approval was successful or not	
+    /// @notice 设置帐户允许支付的最大金额
+    /// @param _spender 待批准交易的账户
+    /// @param _value 授权交易的token总数
+    /// @return 是否成功
     function approve(address _spender, uint256 _value) returns (bool success);
 
-    /// @param _owner The address of the account owning tokens
-    /// @param _spender The address of the account able to transfer the tokens
-    /// @return Amount of remaining tokens allowed to spent	
+    /// @param _owner 拥有token的账户
+    /// @param _spender 被交易用户的账户
+    /// @return 最多允许交易多少token
     function allowance(address _owner, address _spender) constant returns (uint256 remaining);
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 }
 
+//迁移，貌似是要将当前代币移到uip上
 contract IMigrationContract {
     function migrate(address addr, uint256 uip) returns (bool success);
 }
@@ -61,12 +63,12 @@ contract SafeMath {
         assert((x == 0)||(z/x == y));
         return z;
     }
-
 }
 
 /*  ERC 20 token */
 contract StandardToken is Token {
 
+    //msg.sender发送token给_to
     function transfer(address _to, uint256 _value) returns (bool success) {
         if (balances[msg.sender] >= _value && _value > 0) {
             balances[msg.sender] -= _value;
@@ -104,8 +106,8 @@ contract StandardToken is Token {
         return allowed[_owner][_spender];
     }
 
-    mapping (address => uint256) balances;
-    mapping (address => mapping (address => uint256)) allowed;
+    mapping (address => uint256) balances;  //存储每个账户余额
+    mapping (address => mapping (address => uint256)) allowed; //发送账户允许转的上线，比如：allowed[_from][msg.sender] msg.sender账户最多允许从_from账户交易的token的数量
 }
 
 contract UnlimitedIPToken is StandardToken, SafeMath {

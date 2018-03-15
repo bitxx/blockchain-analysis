@@ -1,9 +1,15 @@
 // Abstract contract for the full ERC 20 Token standard
 // https://github.com/ethereum/EIPs/issues/20
+// 此token为UnlimitedIP未来版权发行币的源码，我将它中文翻译了一下，顺便改了下token名字，
+// 参考地址：https://github.com/linkentertainments/UnlimitedIP-Token
+
+/**
+ * 需要注意，该token是将所有兑换到的eth锁定在一个地址上
+ */
 pragma solidity ^0.4.10;
 
 contract Token {
-    /// 所有的token种类
+    /// token的总发行量
     uint256 public totalSupply;
 
     /// @notice 查询余额
@@ -120,59 +126,64 @@ contract FBToken is StandardToken, SafeMath {
     // 元数据
     string  public constant name = "FB Token";
     string  public constant symbol = "FB";
-    uint256 public constant decimals = 18;
+    uint256 public constant decimals = 18; //小数位数，如此可以计算出以最小单位的token的值是多少
     string  public version = "1.0";
 
     // 合约
     address public ethFundDeposit;          // FB存储ETH的地址
-    address public newContractAddr;         // FBtoken用于更新合约的地址
+    address public newContractAddr;         // FBtoken 新更新的合约地址
 
-    // crowdsale parameters
-    bool    public isFunding;                // 在正式运转时候，设为true
-    uint256 public fundingStartBlock;        // 块资金开始
-    uint256 public fundingStopBlock;         // 块资金截止
+    // crowdsale parameters（很高大上的名字对吧？其实这crowdsale就叫做ICO，此处用来设置参数）
+    bool    public isFunding;                // 是否开始募集，开始时候，设为true
+    uint256 public fundingStartBlock;        // 开始募集的块的高度
+    uint256 public fundingStopBlock;         // 截止募集的块的高度
 
-    uint256 public currentSupply;           // 当前用于销售的token
-    uint256 public tokenRaised = 0;         // 所有要销售的token
-    uint256 public tokenMigrated = 0;     // 总的用于交易的token
-    uint256 public tokenExchangeRate = 1000;             // 1000 UIP tokens per 1 ETH
+    uint256 public currentSupply;           // 当前供应的token总数（由指定账户从总发行的地址中取出放在此处）
+    uint256 public tokenRaised = 0;         // 当前私募用eth兑换了的token总数
+    uint256 public tokenMigrated = 0;       // 新迁移的token的额度，用于更新合约后，将token转移在这新的合约中
+    uint256 public tokenExchangeRate = 1000;             // 1个eth可以兑换1000个FB，测试使用
 
-    // events
+    // 事件
     event IssueToken(address indexed _to, uint256 _value);      // issue token for public sale;
     event IncreaseSupply(uint256 _value);
     event DecreaseSupply(uint256 _value);
     event Migrate(address indexed _to, uint256 _value);  //总的
     event Burn(address indexed from, uint256 _value);  //销毁
-    // format decimals.
+
+    // 所有涉及到token额度的，都是以最小单位计算
+    //@notice _value也就是指定数目的token最小单位有多大，比如，以太坊最小单位有18位 1eth = 1*10**18wei。
+    //@param 以最小单位的tokeny
     function formatDecimals(uint256 _value) internal returns (uint256 ) {
-        return _value * 10 ** decimals;
+        return _value * 10 ** decimals;  //**表示次方
     }
 
-    // constructor
+    // 结构体
     function FBToken()
     {
-        ethFundDeposit = 0xBbf91Cf4cf582600BEcBb63d5BdB8D969F21779C; //eth众筹的资金存放地址
+        //发行token的起始地址,
+        // 兑换token后的eth也存在此处，注意eth和token的概念
+        ethFundDeposit = 0xBbf91Cf4cf582600BEcBb63d5BdB8D969F21779C;
 
-        isFunding = false;                           //通过crowdsale状态来控制
+        isFunding = false;                           //crowdsale（ICO）开始前更改
         fundingStartBlock = 0;
         fundingStopBlock = 0;
 
-        currentSupply = formatDecimals(0);
-        totalSupply = formatDecimals(3000000000);
+        currentSupply = formatDecimals(0);  //当前发行的
+        totalSupply = formatDecimals(3000000000);  //总共发行的token,用最小单位
         require(currentSupply <= totalSupply);
         balances[ethFundDeposit] = totalSupply-currentSupply;
     }
 
     modifier isOwner()  { require(msg.sender == ethFundDeposit); _; }
 
-    /// @dev set the token's tokenExchangeRate,
+    /// @dev 设置token的交易率
     function setTokenExchangeRate(uint256 _tokenExchangeRate) isOwner external {
         require(_tokenExchangeRate > 0);
         require(_tokenExchangeRate != tokenExchangeRate);
         tokenExchangeRate = _tokenExchangeRate;
     }
 
-    /// @dev increase the token's supply
+    /// @dev 增加token的总的供应量，
     function increaseSupply (uint256 _value) isOwner external {
         uint256 value = formatDecimals(_value);
         require (value + currentSupply <= totalSupply);
@@ -182,7 +193,7 @@ contract FBToken is StandardToken, SafeMath {
         IncreaseSupply(value);
     }
 
-    /// @dev decrease the token's supply
+    /// @dev 减少token的供应，tokenRaised为用eth兑换的token的总量
     function decreaseSupply (uint256 _value) isOwner external {
         uint256 value = formatDecimals(_value);
         require (value + tokenRaised <= currentSupply);
@@ -191,7 +202,7 @@ contract FBToken is StandardToken, SafeMath {
         DecreaseSupply(value);
     }
 
-    /// @dev turn on the funding state
+    /// @dev 启动私募
     function startFunding (uint256 _fundingStartBlock, uint256 _fundingStopBlock) isOwner external {
         require(!isFunding);
         require(_fundingStartBlock < _fundingStopBlock);
@@ -201,25 +212,25 @@ contract FBToken is StandardToken, SafeMath {
         isFunding = true;
     }
 
-    /// @dev turn off the funding state
+    /// @dev 关闭私募机制
     function stopFunding() isOwner external {
         require(isFunding);
         isFunding = false;
     }
 
-    /// @dev set a new contract for recieve the tokens (for update contract)
+    /// @dev 设置一个新的合约用来接收token (用于更新合约)
     function setMigrateContract(address _newContractAddr) isOwner external {
         require(_newContractAddr != newContractAddr);
         newContractAddr = _newContractAddr;
     }
 
-    /// @dev set a new owner.
+    /// @dev 设置一个新的合约拥有者
     function changeOwner(address _newFundDeposit) isOwner() external {
         require(_newFundDeposit != address(0x0));
         ethFundDeposit = _newFundDeposit;
     }
 
-    /// sends the tokens to new contract
+    /// 把token发到新的合约上
     function migrate() external {
         require(!isFunding);
         require(newContractAddr != address(0x0));
@@ -236,12 +247,13 @@ contract FBToken is StandardToken, SafeMath {
         Migrate(msg.sender, tokens);               // log it
     }
 
-    /// @dev withdraw ETH from contract to UnlimitedIP team address
+    /// @dev 将合约地址的以太坊币转移到token开发团队指定的地址
     function transferETH() isOwner external {
         require(this.balance > 0);
-        require(ethFundDeposit.send(this.balance));
+        require(ethFundDeposit.send(this.balance)); //转移eth到ethFundDeposit
     }
 
+    //指定账户销毁token
     function burn(uint256 _value) isOwner returns (bool success){
         uint256 value = formatDecimals(_value);
         require(balances[msg.sender] >= value && value>0);
@@ -251,7 +263,7 @@ contract FBToken is StandardToken, SafeMath {
         return true;
     }
 
-    /// buys the tokens
+    /// 用eth购买token
     function () payable {
         require (isFunding);
         require(msg.value > 0);

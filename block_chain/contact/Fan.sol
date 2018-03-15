@@ -143,7 +143,7 @@ contract FBToken is StandardToken, SafeMath {
     uint256 public tokenMigrated = 0;       // 新迁移的token的额度，用于更新合约后，将token转移在这新的合约中
     uint256 public tokenExchangeRate = 1000;             // 1个eth可以兑换1000个FB，测试使用
 
-    // 事件
+    // 事件，不解释，基础
     event IssueToken(address indexed _to, uint256 _value);      // issue token for public sale;
     event IncreaseSupply(uint256 _value);
     event DecreaseSupply(uint256 _value);
@@ -268,15 +268,15 @@ contract FBToken is StandardToken, SafeMath {
         require (isFunding);
         require(msg.value > 0);
 
-        require(block.number >= fundingStartBlock);
-        require(block.number <= fundingStopBlock);
+        require(block.number >= fundingStartBlock); //验证起始高度
+        require(block.number <= fundingStopBlock);  //验证截止高度
 
-        uint256 tokens = safeMult(msg.value, tokenExchangeRate);
-        require(tokens + tokenRaised <= currentSupply);
+        uint256 tokens = safeMult(msg.value, tokenExchangeRate); //eth按照指定比率兑换到token，
+        require(tokens + tokenRaised <= currentSupply);  //要注意，准备兑换的token数和已经兑换的token总数不得超过总供应数
 
-        tokenRaised = safeAdd(tokenRaised, tokens);
+        tokenRaised = safeAdd(tokenRaised, tokens);   //合约中，用eth兑换的token总数
         balances[msg.sender] += tokens;
 
-        IssueToken(msg.sender, tokens);  // logs token issued
+        IssueToken(msg.sender, tokens);  // 事件
     }
 }

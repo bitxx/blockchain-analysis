@@ -1,0 +1,13 @@
+{
+  "name": "fb-crowdsale-contracts",
+  "version": "1.0.0",
+  "description": "Fb Token crowdsale contracts",
+  "directories": {
+    "test": "test"
+  },
+  "author": "Wujian<jian.wu@sangular.com>",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "chai": "^4.1.1"
+  }
+}

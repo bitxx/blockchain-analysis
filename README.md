@@ -28,7 +28,7 @@
             - [第2讲 安装](/doc/truffle/doc/第2讲_安装.md) 
             - [第3讲 创建项目](/doc/truffle/doc/第3讲_创建项目.md)
             - [第4讲 选择一个以太坊客户端](/doc/truffle/doc/第4讲_选择一个以太坊客户端.md)
-            - [第5讲 编译合约](/doc/truffle/doc/第5讲_编译合同.md)
+            - [第5讲 编译合约](/doc/truffle/doc/第5讲_编译合约.md)
             - [第6讲 项目发布](/doc/truffle/doc/第6讲_项目发布.md)
             - [第7.1讲 测试合约](/doc/truffle/doc/第7.1讲_测试合约.md)
             - [第7.2讲 编写一个JavaScript测试文件](/doc/truffle/doc/第7.2讲_编写一个JavaScript测试文件.md)

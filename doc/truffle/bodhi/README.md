@@ -1,7 +1,7 @@
 # 基于Truffle的Bodhi Token项目分析  
 * 虽然Truffle官方文档给出了详细的使用描述，但对于第一次接触的人来说，在实际项目中的使用还是会感到无处下手。
 * 这里小编通过分析一个已经比较成熟的菩提Token项目来更详细的了解一下Truffle在一个真实的项目中是怎样运转的。
-* 小编此处上传的菩提Token源码仅限用于分析，具体环境搭建以及安装部署请参考官方描述官方：https://github.com/bodhiproject/contracts
+* 小编此处上传的菩提Token源码仅限用于分析（其中有部分源码小编加上了中文注释），具体环境搭建以及安装部署请参考官方描述官方：https://github.com/bodhiproject/contracts
 * Truffle版本：4.1.3，最好先对此工具有一定的了解
 * Nodejs版本：9.8.0，阅读者要有此基础
 ## 安装部署（概述）
@@ -61,4 +61,169 @@
 |\_\_\_\_.gitignore **//你再猜这是干嘛**  
 |____package-lock.json **//nodejs新版，用于记录当前安装包的状态等信息，方便之后安装**     
 |____package.json **//该项目依赖的nodejs包都在这里面，主要是测试包bluebird和chai**  
-|____solc_compile.sh **//solc编译合约（知道什么是solc吧），小编没用，TruffleDevelop环境就够了**
+|____solc_compile.sh **//solc编译合约（知道什么是solc吧），小编没用，TruffleDevelop环境就够了**  
+## 测试文件分析  
+chai、mocha、bluebrid等测试工具，要是一个个专门去学去了解想想也心累。在此，小编通过分析base_token.js文件来了解下整个测试方式。总共涉及到三个文件：  
+base_token.js **//基本token合约测试**  
+block_height_manager.js **//base_token依赖文件**  
+BasicTokenMock.sol **//该合约继承自BasicToken.sol，用于测试，该文件小编就不分析了**  
+### block_height_manager.js分析  
+base_token.js需要依赖此文件，因此先分析此文件  
+```js
+const bluebird = require('bluebird');  //bluebird测试工具
+function BlockHeightManager(web3) {
+    let getBlockNumber = bluebird.promisify(web3.eth.getBlockNumber); //获取当前块数
+    let snapshotId;  
+    
+    this.revert = () => {
+        return new Promise((resolve, reject) => {
+            web3.currentProvider.sendAsync({
+                jsonrpc: '2.0',
+                method: 'evm_revert',
+                id: new Date().getTime(),
+                params: [snapshotId]
+            }, (err, result) => {
+                if (err)
+                    return reject(err);
+                return resolve(this.snapshot());
+            });
+        });
+    }  
+    
+    this.snapshot = () => {
+        return new Promise((resolve, reject) => {
+            web3.currentProvider.sendAsync({
+                jsonrpc: '2.0',
+                method: 'evm_snapshot',
+                id: new Date().getTime(),
+                params: []
+            }, (err, result) => {
+                if (err)
+                    return reject(err);
+                snapshotId = web3.toDecimal(result.result);
+                return resolve();
+            });
+        })
+    }  
+    
+    this.proceedBlock = () => {
+        return new Promise((resolve, reject) => {
+            web3.currentProvider.sendAsync({
+                jsonrpc: '2.0',
+                method: 'evm_mine',
+                id: new Date().getTime(),
+                //params: [numOfBlocks]
+            }, (err, result) => {
+                if (err)
+                    return reject(err);
+                return resolve();
+            });
+        });
+    }  
+    
+    this.mine = async (numOfBlocks) => {
+        let i = 0;
+        for (i = 0; i < numOfBlocks; i++)
+            await this.proceedBlock();
+    }  
+    
+    this.mineTo = async (height) => {
+        let currentHeight = await getBlockNumber();
+        if (currentHeight > height)
+            throw new Error('Expecting height: ' + height + 'is not reachable');
+        return this.mine(height - currentHeight);
+    }
+}
+
+module.exports = BlockHeightManager;
+```  
+### base_token.js分析  
+```js
+const BasicTokenMock = artifacts.require('./mocks/BasicTokenMock.sol');
+const BlockHeightManager = require('./helpers/block_height_manager');
+const assert = require('chai').assert;
+const web3 = global.web3;  
+
+contract('BasicToken', function(accounts) {
+    const blockHeightManager = new BlockHeightManager(web3);
+    const owner = accounts[0];
+    const acct1 = accounts[1];
+    const acct2 = accounts[2];
+    const acct3 = accounts[3];
+    const tokenParams = {
+        _initialAccount: owner,
+        _initialBalance: 10000000
+    };  
+    
+    let instance;
+    beforeEach(blockHeightManager.snapshot);
+    afterEach(blockHeightManager.revert);
+    beforeEach(async function() {
+        instance = await BasicTokenMock.new(...Object.values(tokenParams), { from: owner }); //合约最后一项是转账参数
+    });  
+    
+    describe('constructor', async function() {
+        it('should initialize all the values correctly', async function() {
+            assert.equal(await instance.balanceOf(owner, { from: owner }), tokenParams._initialBalance, 
+                'owner balance does not match');
+            assert.equal(await instance.totalSupply.call(), tokenParams._initialBalance, 'totalSupply does not match');
+        });
+    });  
+    
+    describe('transfer', async function() {
+        it('should allow transfers if the account has tokens', async function() {
+            var ownerBalance = tokenParams._initialBalance;
+            assert.equal(await instance.balanceOf(owner, { from: owner }), ownerBalance, 'owner balance does not match');
+            let acct1TransferAmt = 300000;
+            await instance.transfer(acct1, acct1TransferAmt, { from: owner });
+            assert.equal(await instance.balanceOf(acct1), acct1TransferAmt, 'accounts[1] balance does not match');  
+            
+            ownerBalance = ownerBalance - acct1TransferAmt;
+            assert.equal(await instance.balanceOf(owner), ownerBalance, 
+                'owner balance does not match after first transfer');  
+            
+            let acct2TransferAmt = 250000;
+            await instance.transfer(acct2, acct2TransferAmt, { from: owner });
+            assert.equal(await instance.balanceOf(acct2), acct2TransferAmt, 'accounts[2] balance does not match');  
+            ownerBalance = ownerBalance - acct2TransferAmt;
+            assert.equal(await instance.balanceOf(owner, { from: owner }), ownerBalance, 
+                'new owner balance does not match after second transfer');  
+            
+            await instance.transfer(acct3, acct2TransferAmt, { from: acct2 });
+            assert.equal(await instance.balanceOf(acct3), acct2TransferAmt, 'accounts[3] balance does not match');
+            assert.equal(await instance.balanceOf(acct2), 0, 'accounts[2] balance should be 0');
+        });  
+        
+        it('should throw if the to address is not valid', async function() {
+            try {
+                await instance.transfer(acct1, 1, { from: owner }); //owner发送token给acct1
+            } catch(e) {
+                assert.match(e.message, /invalid opcode/);
+            }
+        });  
+        
+        it('should throw if the balance of the transferer is less than the amount', async function() {
+            assert.equal(await instance.balanceOf(owner), tokenParams._initialBalance, 'owner balance does not match');
+            try {
+                await instance.transfer(acct1, tokenParams._initialBalance + 1, { from: owner });
+            } catch(e) {
+                assert.match(e.message, /invalid opcode/);
+            }  
+            try {
+                await instance.transfer(acct3, 1, { from: acct2 });
+            } catch(e) {
+                assert.match(e.message, /invalid opcode/);
+            }
+        });
+    });  
+    
+    describe('balanceOf', async function() {
+        it('should return the right balance', async function() {
+            assert.equal(await instance.balanceOf(owner), tokenParams._initialBalance, 'owner balance does not match');
+            assert.equal(await instance.balanceOf(acct1), 0, 'accounts[1] balance should be 0');
+            assert.equal(await instance.balanceOf(acct2), 0, 'accounts[2] balance should be 0');
+        });
+    });
+});
+```      
+    

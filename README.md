@@ -23,7 +23,8 @@
         - [rlp源码解析](/doc/eth_src_analysis/rlp源码解析.md)
     - Truffle
         - [基于Truffle的Bodhi Token项目分析](/doc/truffle/bodhi)
-        - [Truffle官方文档翻译(小编基于4.1.3翻译)](/doc/truffle/doc) 
+        - Truffle官方文档翻译(小编基于4.1.3版翻译)
+            - [概述](/doc/truffle/doc/第1讲_概述) 
 - EOS
     - 源码解析
 - 其余

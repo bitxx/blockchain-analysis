@@ -63,19 +63,21 @@
 |____package.json **//该项目依赖的nodejs包都在这里面，主要是测试包bluebird和chai**  
 |____solc_compile.sh **//solc编译合约（知道什么是solc吧），小编没用，TruffleDevelop环境就够了**  
 ## 测试文件分析  
-chai、mocha、bluebrid等测试工具，要是一个个专门去学去了解想想也心累。在此，小编通过分析base_token.js文件来了解下整个测试方式。总共涉及到三个文件：  
+小编只是大概列出来了，关键地方备注了一下，后面再根据需要调整吧  
+*** 
+  chai、mocha、bluebrid等测试工具，要是一个个专门去学去了解想想也心累。在此，小编通过分析base_token.js文件来了解下整个测试方式。总共涉及到三个文件：  
 base_token.js **//基本token合约测试**  
 block_height_manager.js **//base_token依赖文件**  
 BasicTokenMock.sol **//该合约继承自BasicToken.sol，用于测试，该文件小编就不分析了**  
 ### block_height_manager.js分析  
 base_token.js需要依赖此文件，因此先分析此文件  
 ```js
-const bluebird = require('bluebird');  //bluebird测试工具
+const bluebird = require('bluebird');  //bluebird测试工具,只是读取块文件用到
 function BlockHeightManager(web3) {
     let getBlockNumber = bluebird.promisify(web3.eth.getBlockNumber); //获取当前块数
     let snapshotId;  
     
-    this.revert = () => {
+    this.revert = () => {  //恢复快照
         return new Promise((resolve, reject) => {
             web3.currentProvider.sendAsync({
                 jsonrpc: '2.0',
@@ -90,7 +92,7 @@ function BlockHeightManager(web3) {
         });
     }  
     
-    this.snapshot = () => {
+    this.snapshot = () => {  //创建快照
         return new Promise((resolve, reject) => {
             web3.currentProvider.sendAsync({
                 jsonrpc: '2.0',
@@ -142,28 +144,30 @@ module.exports = BlockHeightManager;
 const BasicTokenMock = artifacts.require('./mocks/BasicTokenMock.sol');
 const BlockHeightManager = require('./helpers/block_height_manager');
 const assert = require('chai').assert;
-const web3 = global.web3;  
+const web3 = global.web3;  //其实truffle中已经继承web3了，测试时候会自动解析 
 
-contract('BasicToken', function(accounts) {
+contract('BasicToken', function(accounts) {  //truffle develop中自带的10个账户
     const blockHeightManager = new BlockHeightManager(web3);
     const owner = accounts[0];
     const acct1 = accounts[1];
     const acct2 = accounts[2];
     const acct3 = accounts[3];
-    const tokenParams = {
+    const tokenParams = {  //设置初始化参数
         _initialAccount: owner,
         _initialBalance: 10000000
     };  
     
     let instance;
-    beforeEach(blockHeightManager.snapshot);
-    afterEach(blockHeightManager.revert);
-    beforeEach(async function() {
+    beforeEach(blockHeightManager.snapshot);  //快照
+    afterEach(blockHeightManager.revert);  
+    
+    beforeEach(async function() {  //实例化用于测试的合约
         instance = await BasicTokenMock.new(...Object.values(tokenParams), { from: owner }); //合约最后一项是转账参数
     });  
     
-    describe('constructor', async function() {
-        it('should initialize all the values correctly', async function() {
+    //之后全是测试断言使用
+    describe('constructor', async function() {  //第一个参数表示要解析结构体还是哪个方法，第二个中是一个回调方法，用于断言结果
+        it('should initialize all the values correctly', async function() {  //执行测试，function中的断言如果成功，则会显示最前面的字符串
             assert.equal(await instance.balanceOf(owner, { from: owner }), tokenParams._initialBalance, 
                 'owner balance does not match');
             assert.equal(await instance.totalSupply.call(), tokenParams._initialBalance, 'totalSupply does not match');
@@ -198,7 +202,7 @@ contract('BasicToken', function(accounts) {
             try {
                 await instance.transfer(acct1, 1, { from: owner }); //owner发送token给acct1
             } catch(e) {
-                assert.match(e.message, /invalid opcode/);
+                assert.match(e.message, /invalid opcode/);  //结果匹配不了，也会异常，
             }
         });  
         

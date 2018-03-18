@@ -24,7 +24,8 @@
     - Truffle
         - [基于Truffle的Bodhi Token项目分析](/doc/truffle/bodhi)
         - Truffle官方文档翻译(小编基于4.1.3版翻译)
-            - [第1讲 概述](/doc/truffle/doc/第1讲_概述.md) 
+            - [第1讲 概述](/doc/truffle/doc/第1讲_概述.md)  
+            - [第2讲 安装](/doc/truffle/doc/第2讲_安装.md) 
 - EOS
     - 源码解析
 - 其余

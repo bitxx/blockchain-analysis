@@ -36,8 +36,7 @@
             - [第13讲 编写外部脚本](/doc/truffle/doc/第13讲_编写外部脚本.md)
             - [第14讲 各种配置文件](/doc/truffle/doc/第14讲_各种配置文件.md)
             - [第15讲 网络和app发布](/doc/truffle/doc/第15讲_网络和app发布.md)  
-            - [第16讲 将应用和truffle集成编译](/doc/truffle/doc/第16讲_将应用和truffle集成编译.md)  
-            
+            - [第16讲 将应用和truffle集成编译](/doc/truffle/doc/第16讲_将应用和truffle集成编译.md)   
 - EOS
     - 源码解析
 - 其余

@@ -42,3 +42,13 @@
 - EOS
     - 源码解析
 - 其余
+
+# 开发依赖库汇总  
+* nodejs  
+    * [truffle-contract](https://github.com/trufflesuite/truffle-contract)  
+    对以太坊的智能合约做了更好的抽象，相比于web3.js，使用truffle-contract操作智能合约更加方便。  
+    优点：  
+        * 同步的交易：可以确保在交易生效之后再继续执行其他操作  
+        * 返回Promise：每个封装的合约函数会返回Promise，可以对它进行.then操作，避免了回调地狱（callback hell）问题
+        * 为交易提供了默认参数：例如from或gas
+        * 为每个同步的交易返回logs、交易receipt和交易hash

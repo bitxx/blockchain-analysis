@@ -8,3 +8,5 @@ module.exports = {
     }
   }
 };
+
+//以上内容都为truffle默认配置

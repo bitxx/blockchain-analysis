@@ -56,7 +56,7 @@
     ```
 5. 转账  
     ```bash
-    eth.sendTransaction({from:eth.accounts[0],to:eth.accounts[3],value:web3.toWei(1000,"ether")})
+    eth.sendTransac0xe3ac04d1f30877de3948b1b0979882971440b6dation({from:eth.accounts[0],to:eth.accounts[3],value:web3.toWei(1000,"ether")})
     ```
 6. 查看交易  
     ```bash

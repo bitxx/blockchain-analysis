@@ -1,6 +1,6 @@
 # 以太坊ERC20_Token标准完整说明  
 **idea_wj小编备注：**  
-* 本文参考了：http://blog.csdn.net/diandianxiyu_geek/article/details/78082551?utm_source=gold_browser_extension  
+* 本文参考自：http://blog.csdn.net/diandianxiyu_geek/article/details/78082551?utm_source=gold_browser_extension  
 * 原文中涉及到了以太坊官方的翻译，但部分翻译不太好理解，小编按自己理解改了一下。  
 * 以太坊Token涉及官方标准：https://ethereum.org/token#the-code
 * 基于此规范,小编实现了一个可以用于发布的合约：[MyToken](../../block_chain/contact/Fan.sol)

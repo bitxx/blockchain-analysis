@@ -14,10 +14,13 @@
  **关注时，请添加备注：github区块链爱好者，谢谢^_^**     
 ## 目录
 - 技术文章（顺序不分先后） 
-    - [用GO语言实现比特币算法-巴比特](/doc/article/用GO语言实现比特币算法.md) 
-    - [以太坊ERC20 Token标准完整说明-CSDN](/doc/article/以太坊ERC20_Token标准完整说明.md)
-        - [Token源码实现-附详细中文注释](/block_chain/contact/Fan.sol)
-    - [关于ERC721的理解-CSDN](/doc/article/关于ERC721的理解.md)
+    - 比特币
+        - [用GO语言实现比特币算法-巴比特(实现中...)](/doc/article/用GO语言实现比特币算法.md) 
+        - [深入浅出比特币：比特币系统是如何运行的？-巴比特](/doc/article/深入浅出比特币：比特币系统是如何运行的？.md)
+    - 以太坊  
+        - [以太坊ERC20 Token标准完整说明-CSDN](/doc/article/以太坊ERC20_Token标准完整说明.md)
+            - [Token源码实现-附详细中文注释](/block_chain/contact/Fan.sol)  
+        - [关于ERC721的理解-CSDN](/doc/article/关于ERC721的理解.md)
 - go-ethereum
     - 源码解析  
         - [常用命令汇总](/doc/command)

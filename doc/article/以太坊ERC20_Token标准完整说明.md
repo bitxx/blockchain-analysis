@@ -10,17 +10,7 @@
 * 新的标准可以让token更兼容，允许其他功能，包括投票标记化。操作更像一个投票操作  
 * Token的持有人可以完全控制资产，遵守ERC20的token可以跟踪任何人在任何时间拥有多少token.基于eth合约的子货币，所以容易实施。只能自己去转让。  
 * 标准化非常有利，也就意味着这些资产可以用于不同的平台和项目，否则只能用在特定的场合。  
-## ERC20 Token标准(Github)  
-### 序言
-```
-EIP: 20
-Title: ERC-20 Token Standard
-Author: Fabian Vogelsteller fabian@ethereum.org, Vitalik Buterin vitalik.buterin@ethereum.org
-Type: Standard
-Category: ERC
-Status: Accepted
-Created: 2015-11-19
-```  
+## ERC20 Token标准(Github)   
 ### 总结  
 token的接口标准  
 ### 抽象  

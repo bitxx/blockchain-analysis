@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-//编码器测试
-//用于测试一个结构题导入结果
 package rlp
 
 import (
@@ -24,12 +22,11 @@ import (
 )
 
 type MyCoolType struct {
-	Name string  //字符串，名称
-	a, b uint    //两个整型数据
+	Name string
+	a, b uint
 }
 
 // EncodeRLP writes x as RLP list [a, b] that omits the Name field.
-// MyCoolType的方法
 func (x *MyCoolType) EncodeRLP(w io.Writer) (err error) {
 	// Note: the receiver can be a nil pointer. This allows you to
 	// control the encoding of nil, but it also means that you have to
@@ -42,10 +39,6 @@ func (x *MyCoolType) EncodeRLP(w io.Writer) (err error) {
 	return err
 }
 
-// 可单独测试该方法，若输出结果与下方Output格式一致，则结果不报错，否则报错
-// 测试一个结构体
-// 切记，go的测试方法，Output:的格式一定要按如下写出，否则无法测试
-//  Output:
 func ExampleEncoder() {
 	var t *MyCoolType // t is nil pointer to MyCoolType
 	bytes, _ := EncodeToBytes(t)

@@ -1,1 +1,1 @@
-geth --datadir "/Users/singularapple/Documents/sangular_project/go/blockchain-analysis/block_chain" init /Users/singularapple/Documents/sangular_project/go/blockchain-analysis/block_chain/genesis.json
+geth --datadir "../../../block_chain" init ../../../block_chain/genesis.json

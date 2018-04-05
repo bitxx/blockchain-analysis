@@ -15,7 +15,6 @@
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package trie implements Merkle Patricia Tries.
-// Merkle（默克尔树）和Patricia Tries（前缀树）的混合
 package trie
 
 import (
@@ -25,7 +24,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/rcrowley/go-metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 var (

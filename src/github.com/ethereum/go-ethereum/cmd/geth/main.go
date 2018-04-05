@@ -28,7 +28,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/console"
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -46,14 +45,7 @@ const (
 var (
 	// Git SHA1 commit hash of the release (set via linker flags)
 	gitCommit = ""
-	// Ethereum address of the Geth release oracle.
-	// 返回的是一个20字节的地址
-	// 用来查看客户端版本是否是最新版本的服务
-	relOracle = common.HexToAddress("0xfa7b9770ca4cb04296cac84f37736d4041251cdf")
-
 	// The app that holds all commands and flags.
-	// app是一个三方包gopkg.in/urfave/cli.v1的实例。 这个三方包的用法大致就是首先构造这个app对象。
-	// 通过代码配置app对象的行为，提供一些回调函数。然后运行的时候直接在main函数里面运行 app.Run(os.Args)就行了。
 	app = utils.NewApp(gitCommit, "the go-ethereum command line interface")
 	// flags that configure the node
 	nodeFlags = []cli.Flag{
@@ -70,7 +62,6 @@ var (
 		utils.DashboardAddrFlag,
 		utils.DashboardPortFlag,
 		utils.DashboardRefreshFlag,
-		utils.DashboardAssetsFlag,
 		utils.EthashCacheDirFlag,
 		utils.EthashCachesInMemoryFlag,
 		utils.EthashCachesOnDiskFlag,
@@ -151,19 +142,18 @@ var (
 	}
 )
 
-
-
-//先执行该方法，之后才会执行main方法
 func init() {
 	// Initialize the CLI app and start Geth
 	app.Action = geth
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2013-2017 The go-ethereum Authors"
-	app.Commands = []cli.Command{  //子命令
+	app.Commands = []cli.Command{
 		// See chaincmd.go:
 		initCommand,
 		importCommand,
 		exportCommand,
+		importPreimagesCommand,
+		exportPreimagesCommand,
 		copydbCommand,
 		removedbCommand,
 		dumpCommand,
@@ -185,7 +175,7 @@ func init() {
 		// See config.go
 		dumpConfigCommand,
 	}
-	sort.Sort(cli.CommandsByName(app.Commands)) //根据命令名称排序
+	sort.Sort(cli.CommandsByName(app.Commands))
 
 	app.Flags = append(app.Flags, nodeFlags...)
 	app.Flags = append(app.Flags, rpcFlags...)
@@ -222,8 +212,6 @@ func main() {
 // geth is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
 // blocking mode, waiting for it to be shut down.
-// 如果没有指定特殊的子命令，那么geth是系统主要的入口。
-// 它会根据提供的参数创建一个默认的节点。并且以阻塞的模式运行这个节点，等待着节点被终止。
 func geth(ctx *cli.Context) error {
 	node := makeFullNode(ctx)
 	startNode(ctx, node)

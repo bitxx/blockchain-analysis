@@ -1,0 +1,7 @@
+.idea
+block_chain/geth
+block_chain/keystore
+block_chain/log
+block_chain/history
+src/github.com/ethereum/go-ethereum/build
+

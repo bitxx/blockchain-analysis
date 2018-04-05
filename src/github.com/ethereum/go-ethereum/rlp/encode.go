@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-//编码器，把GO的数据结构序列化为字节数组
+
 package rlp
 
 import (
@@ -27,9 +27,8 @@ import (
 var (
 	// Common encoded values.
 	// These are useful when implementing EncodeRLP.
-	// 实现EncodeRLP接口需要
-	EmptyString = []byte{0x80}  //128，定义了序列化时候的空字符串，空的时候对应的是编码128。
-	EmptyList   = []byte{0xC0}  //192，定义了序列化时候的空集合，空的时候对应的编码192
+	EmptyString = []byte{0x80}
+	EmptyList   = []byte{0xC0}
 )
 
 // Encoder is implemented by types that require custom
@@ -78,22 +77,16 @@ type Encoder interface {
 //
 // Boolean values are not supported, nor are signed integers, floating
 // point numbers, maps, channels and functions.
-
-//val 是一个任意数据类型
-//该方法用于将数据都保存在encbuf中
 func Encode(w io.Writer, val interface{}) error {
-	//语法说明，断言w.(*encbuf)的具体类型是否为*encbuf，是，则返回给outer=*encbuf,并且ok为true；否，则返回outer=nil，并且ok为false
 	if outer, ok := w.(*encbuf); ok {
 		// Encode was called by some type's EncodeRLP.
 		// Avoid copying by writing to the outer encbuf directly.
-		// encbuf:类似一个缓存结构
-		// encbuf是encode buffer的简写。encbuf出现在Encode方法，和很多Writer方法中。顾名思义，这个是在encode的过程中充当buffer的作用。下面先看看encbuf的定义。
-		return outer.encode(val) //原始数据进行编码，刚编码好的数据是放在字符串中的
+		return outer.encode(val)
 	}
-	eb := encbufPool.Get().(*encbuf) //从池子获取一个用于存储完整编码数据的空间，若没有该空间，则新建
-	defer encbufPool.Put(eb) //当return后才会执行
+	eb := encbufPool.Get().(*encbuf)
+	defer encbufPool.Put(eb)
 	eb.reset()
-	if err := eb.encode(val); err != nil {//原始数据进行编码，刚编码好的数据是放在字符串中的
+	if err := eb.encode(val); err != nil {
 		return err
 	}
 	return eb.toWriter(w)
@@ -101,17 +94,14 @@ func Encode(w io.Writer, val interface{}) error {
 
 // EncodeBytes returns the RLP encoding of val.
 // Please see the documentation of Encode for the encoding rules.
-// 将任意数据返回为 RLP编码，这个为编码的原始入口
-// 该方法与上面的Encode()方法类似，但上面的只是将编码结果保存在w中了
-
 func EncodeToBytes(val interface{}) ([]byte, error) {
-	eb := encbufPool.Get().(*encbuf)  //从池子获取一个用于存储完整编码数据的空间，若没有该空间，则新建
-	defer encbufPool.Put(eb)  //return 结束之后才会执行
-	eb.reset()  //初始化池子里的对象
-	if err := eb.encode(val); err != nil { //原始数据进行编码，刚编码好的数据是放在字符串中的
+	eb := encbufPool.Get().(*encbuf)
+	defer encbufPool.Put(eb)
+	eb.reset()
+	if err := eb.encode(val); err != nil {
 		return nil, err
 	}
-	return eb.toBytes(), nil //将编码后的字符串数据放在byte[]中，
+	return eb.toBytes(), nil
 }
 
 // EncodeReader returns a reader from which the RLP encoding of val
@@ -129,15 +119,15 @@ func EncodeToReader(val interface{}) (size int, r io.Reader, err error) {
 }
 
 type encbuf struct {
-	str     []byte      // string data, contains everything except list headers 包含了所有的内容，除了列表的头部
-	lheads  []*listhead // all list headers  列表头部，str中编码的数据是原始的所有数据，并没有包含其余辅助数据，因此用listhead来记录每个原始数据在哪部分
+	str     []byte      // string data, contains everything except list headers
+	lheads  []*listhead // all list headers
 	lhsize  int         // sum of sizes of all encoded list headers
-	sizebuf []byte      // 9-byte auxiliary buffer for uint encoding  9个字节大小的辅助buffer，专门用来处理uint的编码的
+	sizebuf []byte      // 9-byte auxiliary buffer for uint encoding
 }
 
 type listhead struct {
-	offset int // index of this header in string data offset字段记录了列表数据在str字段的哪个位置
-	size   int // total size of encoded data (including list headers) size字段记录了包含列表头的编码后的数据的总长度。
+	offset int // index of this header in string data
+	size   int // total size of encoded data (including list headers)
 }
 
 // encode writes head to the given buffer, which must be at least
@@ -157,10 +147,9 @@ func headsize(size uint64) int {
 
 // puthead writes a list or string header to buf.
 // buf must be at least 9 bytes long.
-// 把头部插入最终编码序列中
 func puthead(buf []byte, smalltag, largetag byte, size uint64) int {
 	if size < 56 {
-		buf[0] = smalltag + byte(size) //buf[0]，对应于完整编码序列的当前待插入位置
+		buf[0] = smalltag + byte(size)
 		return 1
 	} else {
 		sizesize := putint(buf[1:], size)
@@ -170,13 +159,10 @@ func puthead(buf []byte, smalltag, largetag byte, size uint64) int {
 }
 
 // encbufs are pooled.
-// 为encbuf中的缓存字段设置缓存大小，新建一个9字节的缓存，用于缓存待编码数据（部分）
-// 新建一个encbuf，它里面存放一个待编码的完整数据
 var encbufPool = sync.Pool{
 	New: func() interface{} { return &encbuf{sizebuf: make([]byte, 9)} },
 }
 
-//w中的sizebuf没有必要初始化
 func (w *encbuf) reset() {
 	w.lhsize = 0
 	if w.str != nil {
@@ -193,16 +179,12 @@ func (w *encbuf) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
-//编码入口
 func (w *encbuf) encode(val interface{}) error {
-	rval := reflect.ValueOf(val)  //获取该数据的值
-	ti, err := cachedTypeInfo(rval.Type(), tags{}) //根据数据类型来处理
+	rval := reflect.ValueOf(val)
+	ti, err := cachedTypeInfo(rval.Type(), tags{})
 	if err != nil {
 		return err
 	}
-	//将编码后的数据都保存到encbuf中
-	//此时才真正执行了makeWriter()方法中返回的write方法名对应的操作
-	//write为定义的函数类型，函数名不同，但参数类型和返回相同，则都为同类型
 	return ti.writer(rval, w)
 }
 
@@ -256,11 +238,10 @@ func (w *encbuf) toBytes() []byte {
 		pos += n
 		strpos += n
 		// write the header
-		enc := head.encode(out[pos:]) //把当前数据类型对应的头部信息插入（后续解析需要）
+		enc := head.encode(out[pos:])
 		pos += len(enc)
 	}
-	// 最后一个数据没有被头部索引标示，作为最后一个，它可以直接读取和保存
-	// 因此在这里需要单独保存最后一部分数据到最终到byte[]中
+	// copy string data after the last list header
 	copy(out[pos:], w.str[strpos:])
 	return out
 }
@@ -358,38 +339,28 @@ func (r *encReader) next() []byte {
 }
 
 var (
-
 	encoderInterface = reflect.TypeOf(new(Encoder)).Elem()
 	big0             = big.NewInt(0)
 )
 
 // makeWriter creates a writer function for the given type.
-
-/**
-//编码入口
-// 只是返回了连接后的新字串，写入
-// writer为通用函数，数据类型一致，均可等同于该类型函数，
-// go返回的不同方法名的理解：
-// 方法名对应的与type write func(x,x)参数类型一致，表示为同一函数类型，
-// 返回方法名，说明参数值默认为当前最近的值，就是那个val 和 w
- */
 func makeWriter(typ reflect.Type, ts tags) (writer, error) {
 	kind := typ.Kind()
 	switch {
 	case typ == rawValueType:
-		return writeRawValue, nil //若为字节数组,直接写入
+		return writeRawValue, nil
 	case typ.Implements(encoderInterface):
-		return writeEncoder, nil //若为自定义数据类型，实现了自定义编码接口
+		return writeEncoder, nil
 	case kind != reflect.Ptr && reflect.PtrTo(typ).Implements(encoderInterface):
-		return writeEncoderNoPtr, nil  //若为数据类型转换成指针类型后，若该指针实现了自定义编码接口，则在此读取
+		return writeEncoderNoPtr, nil
 	case kind == reflect.Interface:
-		return writeInterface, nil    //若为go的一种数据类型Interface，需要自行实现，该串会被直接写入，在该方法返回空
+		return writeInterface, nil
 	case typ.AssignableTo(reflect.PtrTo(bigInt)):
-		return writeBigIntPtr, nil  //若为指针对应的大整型，一个数据，指针指向的是这个大整型的第一位，若为0，则说明这个大整型为0
+		return writeBigIntPtr, nil
 	case typ.AssignableTo(bigInt):
-		return writeBigIntNoPtr, nil //若为对应的大整型，一个数据
+		return writeBigIntNoPtr, nil
 	case isUint(kind):
-		return writeUint, nil  //若为无符号整型，一个数据
+		return writeUint, nil
 	case kind == reflect.Bool:
 		return writeBool, nil
 	case kind == reflect.String:
@@ -399,7 +370,7 @@ func makeWriter(typ reflect.Type, ts tags) (writer, error) {
 	case kind == reflect.Array && isByte(typ.Elem()):
 		return writeByteArray, nil
 	case kind == reflect.Slice || kind == reflect.Array:
-		return makeSliceWriter(typ, ts) //数组类型，切片
+		return makeSliceWriter(typ, ts)
 	case kind == reflect.Struct:
 		return makeStructWriter(typ)
 	case kind == reflect.Ptr:
@@ -421,10 +392,10 @@ func writeRawValue(val reflect.Value, w *encbuf) error {
 func writeUint(val reflect.Value, w *encbuf) error {
 	i := val.Uint()
 	if i == 0 {
-		w.str = append(w.str, 0x80)  //默认加入128
+		w.str = append(w.str, 0x80)
 	} else if i < 128 {
 		// fits single byte
-		w.str = append(w.str, byte(i))  //小于128,直接存入
+		w.str = append(w.str, byte(i))
 	} else {
 		// TODO: encode int to w.str directly
 		s := putint(w.sizebuf[1:], i)
@@ -460,8 +431,8 @@ func writeBigIntNoPtr(val reflect.Value, w *encbuf) error {
 func writeBigInt(i *big.Int, w *encbuf) error {
 	if cmp := i.Cmp(big0); cmp == -1 {
 		return fmt.Errorf("rlp: cannot encode negative *big.Int")
-	} else if cmp == 0 {   //指针对应的大整型，一个数据，指针指向的是这个大整型的第一位，若为0，则说明这个大整型为0
-		w.str = append(w.str, 0x80)  //按规则，128输入
+	} else if cmp == 0 {
+		w.str = append(w.str, 0x80)
 	} else {
 		w.encodeString(i.Bytes())
 	}
@@ -519,14 +490,12 @@ func writeEncoderNoPtr(val reflect.Value, w *encbuf) error {
 	return val.Addr().Interface().(Encoder).EncodeRLP(w)
 }
 
-//数据类型是接口，将其编码写入
-//Interface是go中的一种数据类型，需要手动实现method
 func writeInterface(val reflect.Value, w *encbuf) error {
 	if val.IsNil() {
 		// Write empty list. This is consistent with the previous RLP
 		// encoder that we had and should therefore avoid any
 		// problems.
-		w.str = append(w.str, 0xC0)  //看作结构体，字节长度小于56，则追加一个192
+		w.str = append(w.str, 0xC0)
 		return nil
 	}
 	eval := val.Elem()

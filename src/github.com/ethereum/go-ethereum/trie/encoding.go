@@ -33,7 +33,12 @@ package trie
 // of the first byte is zero in the case of an even number of nibbles and the first nibble
 // in the case of an odd number. All remaining nibbles (now an even number) fit properly
 // into the remaining bytes. Compact encoding is used for nodes stored on disk.
-
+/*
+ * 三种编码方式：
+ * keybytes：就是普通的bytes[]
+ * hex：
+ * compact：
+ */
 func hexToCompact(hex []byte) []byte {
 	terminator := byte(0)
 	if hasTerm(hex) {
@@ -64,33 +69,35 @@ func compactToHex(compact []byte) []byte {
 }
 
 func keybytesToHex(str []byte) []byte {
-	l := len(str)*2 + 1
-	var nibbles = make([]byte, l)
+	l := len(str)*2 + 1 //原始数据长度的2倍+1，因为：原始数据一个byte要被拆成两部分，每一部分单独存在一个byte中，另外还需要1位来标注，证明这个数据是hex编码
+	var nibbles = make([]byte, l)  //传说中的nibbles，开辟空间
 	for i, b := range str {
 		nibbles[i*2] = b / 16
 		nibbles[i*2+1] = b % 16
 	}
-	nibbles[l-1] = 16
+	nibbles[l-1] = 16  //最后一位设置为16，表示这是
 	return nibbles
 }
+
+
 
 // hexToKeybytes turns hex nibbles into key bytes.
 // This can only be used for keys of even length.
 func hexToKeybytes(hex []byte) []byte {
-	if hasTerm(hex) {
+	if hasTerm(hex) { //先验证这个hex收否有末尾标示符
 		hex = hex[:len(hex)-1]
 	}
-	if len(hex)&1 != 0 {
+	if len(hex)&1 != 0 {  //是否为偶数，偶数和1与操作，都是0
 		panic("can't convert hex key of odd length")
 	}
-	key := make([]byte, (len(hex)+1)/2)
+	key := make([]byte, (len(hex)+1)/2)  //+1只是确保安全，没别的意思，奇数，求出来的结果一样，代码写的太严谨了，服！
 	decodeNibbles(hex, key)
 	return key
 }
 
 func decodeNibbles(nibbles []byte, bytes []byte) {
 	for bi, ni := 0, 0; ni < len(nibbles); bi, ni = bi+1, ni+2 {
-		bytes[bi] = nibbles[ni]<<4 | nibbles[ni+1]
+		bytes[bi] = nibbles[ni]<<4 | nibbles[ni+1] //高4位低4位还原，代码不精妙吗？
 	}
 }
 

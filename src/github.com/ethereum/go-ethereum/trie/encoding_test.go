@@ -19,8 +19,12 @@ package trie
 import (
 	"bytes"
 	"testing"
+	"fmt"
 )
 
+/**
+ * 将hex转为compact，将compact转为hex
+ */
 func TestHexCompact(t *testing.T) {
 	tests := []struct{ hex, compact []byte }{
 		// empty keys, with and without terminator.
@@ -90,9 +94,10 @@ func BenchmarkCompactToHex(b *testing.B) {
 }
 
 func BenchmarkKeybytesToHex(b *testing.B) {
-	testBytes := []byte{7, 6, 6, 5, 7, 2, 6, 2, 16}
+	testBytes := []byte{7, 6, 6, 5, 7, 2, 6, 2, 176}
 	for i := 0; i < b.N; i++ {
-		keybytesToHex(testBytes)
+		var nibbles = keybytesToHex(testBytes)
+		fmt.Println(nibbles)
 	}
 }
 
@@ -101,4 +106,16 @@ func BenchmarkHexToKeybytes(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		hexToKeybytes(testBytes)
 	}
+}
+
+func TestHexToKeybytes(t *testing.T) {
+	testBytes := []byte{7, 6, 6, 5, 7, 2, 6, 2, 16}
+	if hasTerm(testBytes) { //先验证这个hex收否有末尾标示符
+		testBytes = testBytes[0:len(testBytes)-1] //go特性，不会包含数组最后一位
+	}
+	if len(testBytes)&1 != 0 {
+		panic("can't convert hex key of odd length")
+	}
+	fmt.Println(len(testBytes))
+
 }

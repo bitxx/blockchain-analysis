@@ -40,6 +40,8 @@ package trie
  * compact：
  */
 func hexToCompact(hex []byte) []byte {
+	//buf[0] =0，则输入的hex长度为偶数（无前缀和后缀）
+	//buf[0] !=0，则输入的hex长度为偶数（是否有后缀）
 	terminator := byte(0)
 	if hasTerm(hex) {
 		terminator = 1
@@ -50,7 +52,7 @@ func hexToCompact(hex []byte) []byte {
 	if len(hex)&1 == 1 {
 		buf[0] |= 1 << 4 // odd flag
 		buf[0] |= hex[0] // first nibble is contained in the first byte
-		hex = hex[1:]
+		hex = hex[1:]  //buf[0]>=48,则前缀后缀都有，
 	}
 	decodeNibbles(hex, buf[1:])
 	return buf
@@ -61,7 +63,7 @@ func compactToHex(compact []byte) []byte {
 	base = base[:len(base)-1]
 	// apply terminator flag
 	if base[0] >= 2 {
-		base = append(base, 16)
+		base = append(base, 16) //base加后缀
 	}
 	// apply odd flag
 	chop := 2 - base[0]&1

@@ -27,24 +27,27 @@ import (
 
 var indices = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "[17]"}
 
+//接口定义
+//node接口族担当整个MPT中的各种节点
 type node interface {
 	fstring(string) string
-	cache() (hashNode, bool)
-	canUnload(cachegen, cachelimit uint16) bool
+	cache() (hashNode, bool)  //保存缓存
+	canUnload(cachegen, cachelimit uint16) bool  //除去缓存，cache次数的计数器
 }
 
+//node接口分四种实现: fullNode，shortNode，valueNode，hashNode，其中只有fullNode和shortNode可以带有子节点。
 type (
 	fullNode struct {
-		Children [17]node // Actual trie node data to encode/decode (needs custom encoder)
+		Children [17]node  //对应了黄皮书里面的分支节点//可以拥有多个子节点（17个吧），长度为17的node数组，前16位对应16进制，子节点根据key的第一位，插入到相应的位置。
 		flags    nodeFlag
 	}
-	shortNode struct {
+	shortNode struct {  //对应了黄皮书里面的扩展节点
 		Key   []byte
-		Val   node
+		Val   node  //指向一个字节点
 		flags nodeFlag
 	}
 	hashNode  []byte
-	valueNode []byte
+	valueNode []byte  //叶子节点
 )
 
 // EncodeRLP encodes a full node into the consensus RLP format.

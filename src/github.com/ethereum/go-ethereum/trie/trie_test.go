@@ -48,6 +48,7 @@ func newEmpty() *Trie {
 	return trie
 }
 
+//trie中，只有一个节点，该树的hash值与预设的表示空的节点的hash值一致
 func TestEmptyTrie(t *testing.T) {
 	var trie Trie
 	res := trie.Hash()
@@ -57,10 +58,15 @@ func TestEmptyTrie(t *testing.T) {
 	}
 }
 
+//[86 232 31 23 27 204 85 166 255 131 69 230 146 192 248 110 91 72 224 27 153 108 173 192 1 98 47 181 227 99 180 33]
+
+//trie的节点是空的，添加一个节点，节点的key位32位hash，value为转为byte的字符串"test"
+//这个节点可以理解为叶子节点所指向的实体数据位置
+//该测试用例，t.root为空
 func TestNull(t *testing.T) {
 	var trie Trie
-	key := make([]byte, 32)
-	value := []byte("test")
+	key := make([]byte, 32) //一个32位的hash，但是其中每一位都是0
+	value := []byte("test")  //value为字节数组
 	trie.Update(key, value)
 	if !bytes.Equal(trie.Get(key), value) {
 		t.Fatal("wrong value")

@@ -58,6 +58,17 @@ func TestEmptyTrie(t *testing.T) {
 	}
 }
 
+func TestHash(t *testing.T) {
+	var trie Trie
+	res := trie.Hash()
+	exp := emptyRoot
+	if res != common.Hash(exp) {
+		t.Errorf("expected %x got %x", exp, res)
+	}
+}
+
+
+
 //[86 232 31 23 27 204 85 166 255 131 69 230 146 192 248 110 91 72 224 27 153 108 173 192 1 98 47 181 227 99 180 33]
 
 //trie的节点是空的，添加一个节点，节点的key位32位hash，value为转为byte的字符串"test"
@@ -164,9 +175,10 @@ func TestInsert(t *testing.T) {
 
 	updateString(trie, "doe", "reindeer")
 	updateString(trie, "dog", "puppy")
-	updateString(trie, "dogglesworth", "cat")
+	//updateString(trie, "dogglesworth", "cat")
+	trie.Commit(nil)
 
-	exp := common.HexToHash("8aad789dff2f538bca5d8ea56e8abe10f4c7ba3a5dea95fea4cd6e7c3a1168d3")
+	/*exp := common.HexToHash("8aad789dff2f538bca5d8ea56e8abe10f4c7ba3a5dea95fea4cd6e7c3a1168d3")
 	root := trie.Hash()
 	if root != exp {
 		t.Errorf("exp %x got %x", exp, root)
@@ -182,7 +194,7 @@ func TestInsert(t *testing.T) {
 	}
 	if root != exp {
 		t.Errorf("exp %x got %x", exp, root)
-	}
+	}*/
 }
 
 func TestGet(t *testing.T) {
@@ -352,7 +364,11 @@ func TestCacheUnload(t *testing.T) {
 	// in the 0th and 6th iteration.
 	db := &countingDB{Database: trie.db.diskdb, gets: make(map[string]int)}
 	trie, _ = New(root, NewDatabase(db))
-	trie.SetCacheLimit(5)
+	for dbkey := range db.gets {
+		fmt.Println([]byte(dbkey))
+	}
+
+	trie.SetCacheLimit(4)
 	for i := 0; i < 12; i++ {
 		getString(trie, key1)
 		trie.Commit(nil)

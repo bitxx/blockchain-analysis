@@ -29,9 +29,9 @@ import (
 type hasher struct {
 	tmp        *bytes.Buffer
 	sha        hash.Hash
-	cachegen   uint16
-	cachelimit uint16
-	onleaf     LeafCallback
+	cachegen   uint16  //当前计数
+	cachelimit uint16  //限制缓存计数上线
+	onleaf     LeafCallback //回调
 }
 
 // hashers live in a global db.
@@ -107,8 +107,8 @@ func (h *hasher) hashChildren(original node, db *Database) (node, node, error) {
 	case *shortNode:
 		// Hash the short node's child, caching the newly hashed subtree
 		collapsed, cached := n.copy(), n.copy()
-		collapsed.Key = hexToCompact(n.Key)
-		cached.Key = common.CopyBytes(n.Key)
+		collapsed.Key = hexToCompact(n.Key) //将hex转为compact，方便磁盘存储
+		cached.Key = common.CopyBytes(n.Key) //将key字节数组复制给cached
 
 		if _, ok := n.Val.(valueNode); !ok {
 			collapsed.Val, cached.Val, err = h.hash(n.Val, db, false)
@@ -119,7 +119,7 @@ func (h *hasher) hashChildren(original node, db *Database) (node, node, error) {
 		if collapsed.Val == nil {
 			collapsed.Val = valueNode(nil) // Ensure that nil children are encoded as empty strings.
 		}
-		return collapsed, cached, nil
+		return collapsed, cached, nil  //前者是用于磁盘存储的节点，后者是hash化的节点，可以称为轻节点
 
 	case *fullNode:
 		// Hash the full node's children, caching the newly hashed subtrees

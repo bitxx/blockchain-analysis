@@ -1,4 +1,5 @@
 .idea
+pkg
 block_chain/geth
 block_chain/keystore
 block_chain/log

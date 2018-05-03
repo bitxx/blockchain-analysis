@@ -270,11 +270,10 @@ func runEncTests(t *testing.T, f func(val interface{}) ([]byte, error)) {
 }
 
 func TestEncode(t *testing.T) {
-	runEncTests(t, func(val interface{}) ([]byte, error) {
-		b := new(bytes.Buffer)
-		err := Encode(b, val)
-		return b.Bytes(), err
-	})
+	b := new(bytes.Buffer)
+	Encode(b, "hello i am e,how are you ? i like every one very much")
+	fmt.Print(b.Bytes())
+
 }
 
 func TestEncodeToBytes(t *testing.T) {

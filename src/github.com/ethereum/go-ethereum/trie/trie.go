@@ -69,8 +69,10 @@ type Trie struct {
 	root         node
 	originalRoot common.Hash
 
-	//cachegen表示当前trie树的版本，trie每次commit，则增加1
-	//cachelimit如果当前的cache时代 - cachelimit参数 大于node的cache时代，那么node会从cache里面卸载，以便节约内存。
+	// Cache generation values.
+	// cachegen increases by one with each commit operation.
+	// new nodes are tagged with the current generation and unloaded
+	// when their generation is older than than cachegen-cachelimit.
 	cachegen, cachelimit uint16
 }
 

@@ -121,7 +121,7 @@ func testServerMethodExecution(t *testing.T, method string) {
 		"params":  params,
 	}
 
-	clientConn, serverConn := net.Pipe()
+	clientConn, serverConn := net.Pipe() //Pipe创建一个内存中的同步、全双工网络连接。连接的两端都实现了Conn接口。一端的读取对应另一端的写入，直接将数据在两端之间作拷贝；没有内部缓冲。
 	defer clientConn.Close()
 
 	go server.ServeCodec(NewJSONCodec(serverConn), OptionMethodInvocation)
